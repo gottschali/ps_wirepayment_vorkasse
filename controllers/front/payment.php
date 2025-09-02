@@ -21,9 +21,9 @@
 /**
  * @since 1.5.0
  *
- * @property Ps_Wirepayment $module
+ * @property Ps_Wirepayment_Vorkasse $module
  */
-class Ps_WirepaymentPaymentModuleFrontController extends ModuleFrontController
+class Ps_Wirepayment_VorkassePaymentModuleFrontController extends ModuleFrontController
 {
     public $ssl = true;
 
@@ -46,8 +46,8 @@ class Ps_WirepaymentPaymentModuleFrontController extends ModuleFrontController
 
         $this->context->smarty->assign([
             'back_url' => $this->context->link->getPageLink('order', true, null, 'step=3'),
-            'confirm_url' => $this->context->link->getModuleLink('ps_wirepayment', 'validation', [], true),
-            'image_url' => $this->module->getPathUri() . 'ps_wirepayment.jpg',
+            'confirm_url' => $this->context->link->getModuleLink('ps_wirepayment_vorkasse', 'validation', [], true),
+            'image_url' => $this->module->getPathUri() . 'ps_wirepayment_vorkasse.jpg',
             'cust_currency' => $cart->id_currency,
             'currencies' => $this->module->getCurrency((int) $cart->id_currency),
             'total' => $total,

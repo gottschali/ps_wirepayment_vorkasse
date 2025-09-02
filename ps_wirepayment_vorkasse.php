@@ -24,9 +24,9 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-class Ps_Wirepayment extends PaymentModule
+class Ps_Wirepayment_Vorkasse extends PaymentModule
 {
-    const FLAG_DISPLAY_PAYMENT_INVITE = 'BANK_WIRE_PAYMENT_INVITE';
+    const FLAG_DISPLAY_PAYMENT_INVITE = 'VORKASSE_PAYMENT_INVITE';
 
     protected $_html = '';
     protected $_postErrors = [];
@@ -46,7 +46,7 @@ class Ps_Wirepayment extends PaymentModule
 
     public function __construct()
     {
-        $this->name = 'ps_wirepayment';
+        $this->name = 'ps_wirepayment_vorkasse';
         $this->tab = 'payments_gateways';
         $this->version = '2.2.0';
         $this->ps_versions_compliancy = ['min' => '1.7.6.0', 'max' => _PS_VERSION_];
@@ -57,31 +57,31 @@ class Ps_Wirepayment extends PaymentModule
         $this->currencies = true;
         $this->currencies_mode = 'checkbox';
 
-        $config = Configuration::getMultiple(['BANK_WIRE_DETAILS', 'BANK_WIRE_OWNER', 'BANK_WIRE_ADDRESS', 'BANK_WIRE_RESERVATION_DAYS']);
-        if (!empty($config['BANK_WIRE_OWNER'])) {
-            $this->owner = $config['BANK_WIRE_OWNER'];
+        $config = Configuration::getMultiple(['VORKASSE_DETAILS', 'VORKASSE_OWNER', 'VORKASSE_ADDRESS', 'VORKASSE_RESERVATION_DAYS']);
+        if (!empty($config['VORKASSE_OWNER'])) {
+            $this->owner = $config['VORKASSE_OWNER'];
         }
-        if (!empty($config['BANK_WIRE_DETAILS'])) {
-            $this->details = $config['BANK_WIRE_DETAILS'];
+        if (!empty($config['VORKASSE_DETAILS'])) {
+            $this->details = $config['VORKASSE_DETAILS'];
         }
-        if (!empty($config['BANK_WIRE_ADDRESS'])) {
-            $this->address = $config['BANK_WIRE_ADDRESS'];
+        if (!empty($config['VORKASSE_ADDRESS'])) {
+            $this->address = $config['VORKASSE_ADDRESS'];
         }
-        if (!empty($config['BANK_WIRE_RESERVATION_DAYS'])) {
-            $this->reservation_days = $config['BANK_WIRE_RESERVATION_DAYS'];
+        if (!empty($config['VORKASSE_RESERVATION_DAYS'])) {
+            $this->reservation_days = $config['VORKASSE_RESERVATION_DAYS'];
         }
 
         $this->bootstrap = true;
         parent::__construct();
 
-        $this->displayName = $this->trans('Wire payment', [], 'Modules.Wirepayment.Admin');
-        $this->description = $this->trans('Accept wire payments by displaying your account details during the checkout.', [], 'Modules.Wirepayment.Admin');
-        $this->confirmUninstall = $this->trans('Are you sure about removing these details?', [], 'Modules.Wirepayment.Admin');
+        $this->displayName = $this->trans('Vorkasse', [], 'Modules.Wirepayment.Vorkasse');
+        $this->description = $this->trans('Accept payments in advance (Vorkasse) by displaying your account details during the checkout.', [], 'Modules.Wirepayment.Vorkasse');
+        $this->confirmUninstall = $this->trans('Are you sure about removing these details?', [], 'Modules.Wirepayment.Vorkasse');
         if ((!isset($this->owner) || !isset($this->details) || !isset($this->address)) && $this->active) {
-            $this->warning = $this->trans('Account owner and account details must be configured before using this module.', [], 'Modules.Wirepayment.Admin');
+            $this->warning = $this->trans('Account owner and account details must be configured before using this module.', [], 'Modules.Wirepayment.Vorkasse');
         }
         if (!count(Currency::checkPaymentCurrencies($this->id)) && $this->active) {
-            $this->warning = $this->trans('No currency has been set for this module.', [], 'Modules.Wirepayment.Admin');
+            $this->warning = $this->trans('No currency has been set for this module.', [], 'Modules.Wirepayment.Vorkasse');
         }
 
         $this->extra_mail_vars = [
@@ -106,11 +106,11 @@ class Ps_Wirepayment extends PaymentModule
 
     public function uninstall()
     {
-        if (!Configuration::deleteByName('BANK_WIRE_CUSTOM_TEXT')
-                || !Configuration::deleteByName('BANK_WIRE_DETAILS')
-                || !Configuration::deleteByName('BANK_WIRE_OWNER')
-                || !Configuration::deleteByName('BANK_WIRE_ADDRESS')
-                || !Configuration::deleteByName('BANK_WIRE_RESERVATION_DAYS')
+        if (!Configuration::deleteByName('VORKASSE_CUSTOM_TEXT')
+                || !Configuration::deleteByName('VORKASSE_DETAILS')
+                || !Configuration::deleteByName('VORKASSE_OWNER')
+                || !Configuration::deleteByName('VORKASSE_ADDRESS')
+                || !Configuration::deleteByName('VORKASSE_RESERVATION_DAYS')
                 || !Configuration::deleteByName(self::FLAG_DISPLAY_PAYMENT_INVITE)
                 || !parent::uninstall()) {
             return false;
@@ -127,36 +127,36 @@ class Ps_Wirepayment extends PaymentModule
                 Tools::getValue(self::FLAG_DISPLAY_PAYMENT_INVITE)
             );
 
-            if (!Tools::getValue('BANK_WIRE_DETAILS')) {
+            if (!Tools::getValue('VORKASSE_DETAILS')) {
                 $this->_postErrors[] = $this->trans(
                     'Account details are required.',
                     [],
-                    'Modules.Wirepayment.Admin'
+                    'Modules.Wirepayment.Vorkasse'
                 );
             }
-            if (!Tools::getValue('BANK_WIRE_OWNER')) {
+            if (!Tools::getValue('VORKASSE_OWNER')) {
                 $this->_postErrors[] = $this->trans(
                     'Account owner is required.',
                     [],
-                    'Modules.Wirepayment.Admin'
+                    'Modules.Wirepayment.Vorkasse'
                 );
             }
-            if (!Tools::getValue('BANK_WIRE_ADDRESS')) {
+            if (!Tools::getValue('VORKASSE_ADDRESS')) {
                 $this->_postErrors[] = $this->trans(
                     'Bank address is required.',
                     [],
-                    'Modules.Wirepayment.Admin'
+                    'Modules.Wirepayment.Vorkasse'
                 );
             }
 
-            $fieldReservationDays = Tools::getValue('BANK_WIRE_RESERVATION_DAYS');
+            $fieldReservationDays = Tools::getValue('VORKASSE_RESERVATION_DAYS');
             if ($fieldReservationDays && !Validate::isUnsignedInt($fieldReservationDays)) {
                 $this->_postErrors[] = $this->trans(
                     'The %field% is invalid. Please enter a positive integer.',
                     [
-                        '%field%' => $this->trans('Reservation period', [], 'Modules.Wirepayment.Admin'),
+                        '%field%' => $this->trans('Reservation period', [], 'Modules.Wirepayment.Vorkasse'),
                     ],
-                    'Modules.Wirepayment.Admin'
+                    'Modules.Wirepayment.Vorkasse'
                 );
             }
         }
@@ -165,19 +165,19 @@ class Ps_Wirepayment extends PaymentModule
     protected function _postProcess()
     {
         if (Tools::isSubmit('btnSubmit')) {
-            Configuration::updateValue('BANK_WIRE_DETAILS', Tools::getValue('BANK_WIRE_DETAILS'));
-            Configuration::updateValue('BANK_WIRE_OWNER', Tools::getValue('BANK_WIRE_OWNER'));
-            Configuration::updateValue('BANK_WIRE_ADDRESS', Tools::getValue('BANK_WIRE_ADDRESS'));
+            Configuration::updateValue('VORKASSE_DETAILS', Tools::getValue('VORKASSE_DETAILS'));
+            Configuration::updateValue('VORKASSE_OWNER', Tools::getValue('VORKASSE_OWNER'));
+            Configuration::updateValue('VORKASSE_ADDRESS', Tools::getValue('VORKASSE_ADDRESS'));
 
             $custom_text = [];
             $languages = Language::getLanguages(false);
             foreach ($languages as $lang) {
-                if (Tools::getIsset('BANK_WIRE_CUSTOM_TEXT_' . $lang['id_lang'])) {
-                    $custom_text[$lang['id_lang']] = Tools::getValue('BANK_WIRE_CUSTOM_TEXT_' . $lang['id_lang']);
+                if (Tools::getIsset('VORKASSE_CUSTOM_TEXT_' . $lang['id_lang'])) {
+                    $custom_text[$lang['id_lang']] = Tools::getValue('VORKASSE_CUSTOM_TEXT_' . $lang['id_lang']);
                 }
             }
-            Configuration::updateValue('BANK_WIRE_RESERVATION_DAYS', (int) Tools::getValue('BANK_WIRE_RESERVATION_DAYS'));
-            Configuration::updateValue('BANK_WIRE_CUSTOM_TEXT', $custom_text);
+            Configuration::updateValue('VORKASSE_RESERVATION_DAYS', (int) Tools::getValue('VORKASSE_RESERVATION_DAYS'));
+            Configuration::updateValue('VORKASSE_CUSTOM_TEXT', $custom_text);
         }
         $this->_html .= $this->displayConfirmation($this->trans('Settings updated', [], 'Admin.Global'));
     }
@@ -224,9 +224,9 @@ class Ps_Wirepayment extends PaymentModule
 
         $newOption = new PaymentOption();
         $newOption->setModuleName($this->name)
-                ->setCallToActionText($this->trans('Pay by bank wire', [], 'Modules.Wirepayment.Shop'))
+                ->setCallToActionText($this->trans('Vorkasse', [], 'Modules.Wirepayment.Vorkasse'))
                 ->setAction($this->context->link->getModuleLink($this->name, 'validation', [], true))
-                ->setAdditionalInformation($this->fetch('module:ps_wirepayment/views/templates/hook/ps_wirepayment_intro.tpl'));
+                ->setAdditionalInformation($this->fetch('module:ps_wirepayment_vorkasse/views/templates/hook/ps_wirepayment_intro.tpl'));
 
         return [
             $newOption,
@@ -269,7 +269,7 @@ class Ps_Wirepayment extends PaymentModule
             'contact_url' => $this->context->link->getPageLink('contact', true),
         ]);
 
-        return $this->fetch('module:ps_wirepayment/views/templates/hook/payment_return.tpl');
+        return $this->fetch('module:ps_wirepayment_vorkasse/views/templates/hook/payment_return.tpl');
     }
 
     public function checkCurrency($cart)
@@ -293,27 +293,27 @@ class Ps_Wirepayment extends PaymentModule
         $fields_form = [
             'form' => [
                 'legend' => [
-                    'title' => $this->trans('Account details', [], 'Modules.Wirepayment.Admin'),
+                    'title' => $this->trans('Account details', [], 'Modules.Wirepayment.Vorkasse'),
                     'icon' => 'icon-envelope',
                 ],
                 'input' => [
                     [
                         'type' => 'text',
-                        'label' => $this->trans('Account owner', [], 'Modules.Wirepayment.Admin'),
-                        'name' => 'BANK_WIRE_OWNER',
+                        'label' => $this->trans('Account owner', [], 'Modules.Wirepayment.Vorkasse'),
+                        'name' => 'VORKASSE_OWNER',
                         'required' => true,
                     ],
                     [
                         'type' => 'textarea',
-                        'label' => $this->trans('Account details', [], 'Modules.Wirepayment.Admin'),
-                        'name' => 'BANK_WIRE_DETAILS',
-                        'desc' => $this->trans('Such as bank branch, IBAN number, BIC, etc.', [], 'Modules.Wirepayment.Admin'),
+                        'label' => $this->trans('Account details', [], 'Modules.Wirepayment.Vorkasse'),
+                        'name' => 'VORKASSE_DETAILS',
+                        'desc' => $this->trans('Such as bank branch, IBAN number, BIC, etc.', [], 'Modules.Wirepayment.Vorkasse'),
                         'required' => true,
                     ],
                     [
                         'type' => 'textarea',
-                        'label' => $this->trans('Bank address', [], 'Modules.Wirepayment.Admin'),
-                        'name' => 'BANK_WIRE_ADDRESS',
+                        'label' => $this->trans('Bank address', [], 'Modules.Wirepayment.Vorkasse'),
+                        'name' => 'VORKASSE_ADDRESS',
                         'required' => true,
                     ],
                 ],
@@ -325,29 +325,29 @@ class Ps_Wirepayment extends PaymentModule
         $fields_form_customization = [
             'form' => [
                 'legend' => [
-                    'title' => $this->trans('Customization', [], 'Modules.Wirepayment.Admin'),
+                    'title' => $this->trans('Customization', [], 'Modules.Wirepayment.Vorkasse'),
                     'icon' => 'icon-cogs',
                 ],
                 'input' => [
                     [
                         'type' => 'text',
-                        'label' => $this->trans('Reservation period', [], 'Modules.Wirepayment.Admin'),
-                        'desc' => $this->trans('Number of days the items remain reserved', [], 'Modules.Wirepayment.Admin'),
-                        'name' => 'BANK_WIRE_RESERVATION_DAYS',
+                        'label' => $this->trans('Reservation period', [], 'Modules.Wirepayment.Vorkasse'),
+                        'desc' => $this->trans('Number of days the items remain reserved', [], 'Modules.Wirepayment.Vorkasse'),
+                        'name' => 'VORKASSE_RESERVATION_DAYS',
                     ],
                     [
                         'type' => 'textarea',
-                        'label' => $this->trans('Information to the customer', [], 'Modules.Wirepayment.Admin'),
-                        'name' => 'BANK_WIRE_CUSTOM_TEXT',
-                        'desc' => $this->trans('Information on the bank transfer (processing time, starting of the shipping...)', [], 'Modules.Wirepayment.Admin'),
+                        'label' => $this->trans('Information to the customer', [], 'Modules.Wirepayment.Vorkasse'),
+                        'name' => 'VORKASSE_CUSTOM_TEXT',
+                        'desc' => $this->trans('Information on the bank transfer (processing time, starting of the shipping...)', [], 'Modules.Wirepayment.Vorkasse'),
                         'lang' => true,
                     ],
                     [
                         'type' => 'switch',
-                        'label' => $this->trans('Display the invitation to pay in the order confirmation page', [], 'Modules.Wirepayment.Admin'),
+                        'label' => $this->trans('Display the invitation to pay in the order confirmation page', [], 'Modules.Wirepayment.Vorkasse'),
                         'name' => self::FLAG_DISPLAY_PAYMENT_INVITE,
                         'is_bool' => true,
-                        'hint' => $this->trans('Your country\'s legislation may require you to send the invitation to pay by email only. Disabling the option will hide the invitation on the confirmation page.', [], 'Modules.Wirepayment.Admin'),
+                        'hint' => $this->trans('Your country\'s legislation may require you to send the invitation to pay by email only. Disabling the option will hide the invitation on the confirmation page.', [], 'Modules.Wirepayment.Vorkasse'),
                         'values' => [
                             [
                                 'id' => 'active_on',
@@ -395,17 +395,17 @@ class Ps_Wirepayment extends PaymentModule
         $languages = Language::getLanguages(false);
         foreach ($languages as $lang) {
             $custom_text[$lang['id_lang']] = Tools::getValue(
-                'BANK_WIRE_CUSTOM_TEXT_' . $lang['id_lang'],
-                Configuration::get('BANK_WIRE_CUSTOM_TEXT', $lang['id_lang'])
+                'VORKASSE_CUSTOM_TEXT_' . $lang['id_lang'],
+                Configuration::get('VORKASSE_CUSTOM_TEXT', $lang['id_lang'])
             );
         }
 
         return [
-            'BANK_WIRE_DETAILS' => Tools::getValue('BANK_WIRE_DETAILS', $this->details),
-            'BANK_WIRE_OWNER' => Tools::getValue('BANK_WIRE_OWNER', $this->owner),
-            'BANK_WIRE_ADDRESS' => Tools::getValue('BANK_WIRE_ADDRESS', $this->address),
-            'BANK_WIRE_RESERVATION_DAYS' => Tools::getValue('BANK_WIRE_RESERVATION_DAYS', $this->reservation_days),
-            'BANK_WIRE_CUSTOM_TEXT' => $custom_text,
+            'VORKASSE_DETAILS' => Tools::getValue('VORKASSE_DETAILS', $this->details),
+            'VORKASSE_OWNER' => Tools::getValue('VORKASSE_OWNER', $this->owner),
+            'VORKASSE_ADDRESS' => Tools::getValue('VORKASSE_ADDRESS', $this->address),
+            'VORKASSE_RESERVATION_DAYS' => Tools::getValue('VORKASSE_RESERVATION_DAYS', $this->reservation_days),
+            'VORKASSE_CUSTOM_TEXT' => $custom_text,
             self::FLAG_DISPLAY_PAYMENT_INVITE => Tools::getValue(
                 self::FLAG_DISPLAY_PAYMENT_INVITE,
                 Configuration::get(self::FLAG_DISPLAY_PAYMENT_INVITE)
@@ -417,7 +417,7 @@ class Ps_Wirepayment extends PaymentModule
     {
         $cart = $this->context->cart;
         $total = sprintf(
-            $this->trans('%1$s (tax incl.)', [], 'Modules.Wirepayment.Shop'),
+            $this->trans('%1$s (tax incl.)', [], 'Modules.Wirepayment.Vorkasse'),
             $this->context->getCurrentLocale()->formatPrice($cart->getOrderTotal(true, Cart::BOTH), $this->context->currency->iso_code)
         );
 
@@ -441,7 +441,7 @@ class Ps_Wirepayment extends PaymentModule
             $bankwireReservationDays = 7;
         }
 
-        $bankwireCustomText = Tools::nl2br(Configuration::get('BANK_WIRE_CUSTOM_TEXT', $this->context->language->id));
+        $bankwireCustomText = Tools::nl2br(Configuration::get('VORKASSE_CUSTOM_TEXT', $this->context->language->id));
         if (empty($bankwireCustomText)) {
             $bankwireCustomText = '';
         }

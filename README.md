@@ -1,4 +1,15 @@
-# Wire payment
+# Wire payment Down Payment
+
+Copy of the `ps_wirepayment` module.
+Makes it possible to select different wire payment options, e.g., a different payment address for down payments.
+
+Installation
+
+``` bash
+zip -r ps_wirepayment_vorkasse.zip ps_wirepayment_vorkasse  
+``` 
+
+Then pull this in the UI module installation or put it in the module folder.
 
 ## About
 

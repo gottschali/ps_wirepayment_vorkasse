@@ -21,7 +21,7 @@
   {l s='Your order on %s is complete.' sprintf=[$shop_name] d='Modules.Wirepayment.Shop'}<br/>
   {l s='Please send us a bank wire with:' d='Modules.Wirepayment.Shop'}
 </p>
-{include file='module:ps_wirepayment/views/templates/hook/_partials/payment_infos.tpl'}
+{include file='module:ps_wirepayment_vorkasse/views/templates/hook/_partials/payment_infos.tpl'}
 
 <p>
   {l s='Please specify your order reference %s in the bankwire description.' sprintf=[$reference] d='Modules.Wirepayment.Shop'}<br/>

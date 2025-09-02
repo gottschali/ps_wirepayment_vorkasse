@@ -1,7 +1,7 @@
 {
-  "name": "prestashop/ps_wirepayment",
-  "description": "PrestaShop module ps_wirepayment",
-  "homepage": "https://github.com/PrestaShop/ps_wirepayment",
+  "name": "prestashop/ps_wirepayment_vorkasse",
+  "description": "PrestaShop module ps_wirepayment_vorkasse",
+  "homepage": "https://github.com/gottschali/ps_wirepayment_vorkasse",
   "license": "AFL-3.0",
   "authors": [
     {
@@ -17,7 +17,7 @@
   },
   "autoload": {
     "classmap": [
-      "ps_wirepayment.php"
+      "ps_wirepayment_vorkasse.php"
     ],
     "exclude-from-classmap": []
   },

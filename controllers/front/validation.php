@@ -21,9 +21,9 @@
 /**
  * @since 1.5.0
  *
- * @property Ps_Wirepayment $module
+ * @property Ps_Wirepayment_Vorkasse $module
  */
-class Ps_WirepaymentValidationModuleFrontController extends ModuleFrontController
+class Ps_Wirepayment_VorkasseValidationModuleFrontController extends ModuleFrontController
 {
     /**
      * @see FrontController::postProcess()
@@ -38,7 +38,7 @@ class Ps_WirepaymentValidationModuleFrontController extends ModuleFrontControlle
         // Check that this payment option is still available in case the customer changed his address just before the end of the checkout process
         $authorized = false;
         foreach (Module::getPaymentModules() as $module) {
-            if ($module['name'] == 'ps_wirepayment') {
+            if ($module['name'] == 'ps_wirepayment_vorkasse') {
                 $authorized = true;
                 break;
             }
